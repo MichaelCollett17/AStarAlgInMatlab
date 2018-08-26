@@ -36,7 +36,7 @@ AStar(OccupancyMap, GoalLocation, RobotLocation);
 %loop until we reach the goal location or some maximum number of moves have
 %been tried or we are not moving and have no hope of movement
 while(~isequal(RobotLocation, GoalLocation) && (pathLength < 2000))
-
+    break;
     %[newRobotLocation, obstacleHitInMove] = moveRobot(x_move, y_move, CurrentRobotLocation, OccupancyMap)
     %x_move and y_move are either -1, 0, +1
     %[RobotLocation, obstacleEncountered, pathLength] = moveRobot(1, 1, RobotLocation, OccupancyMap);

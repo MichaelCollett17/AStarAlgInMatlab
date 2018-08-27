@@ -4,7 +4,7 @@ Closed = [];
 [rows, cols] = size(OccupancyMap);
 
 % closed array gets all the 1's
-% closed array format is x y
+% closed array format is x y parentx parenty
 % NOTE: Formatting array instead of building object or researching Matlab
 % farther, but should update in with proper programming in future
 closedCounter = 1;
@@ -14,6 +14,9 @@ for i=1:rows
         if(OccupancyMap(i,j) == 1)
             Closed(closedCounter,1)=i;
             Closed(closedCounter,2)=j;
+            Closed(closedCounter,3)=-1;
+            Closed(closedCounter,4)=-1;
+            Closed(closedCounter,5)=-1;
             closedCounter=closedCounter+1;
         end
     end
@@ -33,6 +36,7 @@ while(rowSizeOpen > 0)
     f = 10000;
     temp = [];
     removeIdx = -1;
+    arrived = false;
     disp(rowSizeOpen);
     for ridx=1:rowSizeOpen
         if Open(ridx,5) < f
@@ -42,14 +46,59 @@ while(rowSizeOpen > 0)
         end
     end
     Open(removeIndex,:) = [];
+    openCounter = openCounter -1;
     % successors format is 1:[x,y,parentx,parenty,f,g]...
     successors = getSuccessors(temp(1), temp(2), temp(6), GoalLocation);
-    for
-        if (temp(1) == GoalLocation(1))&(temp(2)==GoalLocation(2))
-            % list must be built already
+    for successorRow=1:8
+        if (successors(successorRow,1) == GoalLocation(1))&&(successors(successorRow,2)==GoalLocation(2))
+            % must traverse through parents and build return array
+            arrived = true
+            disp("meow");
             break;
         end
-    
-    
+        
+        % computed new f and new g are in 5 and 6 respectively
+        % if position in open and smaller f, skip
+        [rowSizeOpen, colSizeOpen] = size(Open);
+        sameWithLessF = false;
+        for rowindex=1:rowSizeOpen
+            if (Open(rowindex,1)==successors(successorRow,1)) && (Open(rowindex,2)==successors(successorRow,2))&& (Open(rowindex,5)<successors(successorRow,5))
+                sameWithLessF = true;
+                break;
+            end
+        end
+        if sameWithLessF == true
+           continue; 
+        end
+        
+        % if same with less f in closed, skip (skips walls and obstacles :)
+        [rowSizeClosed, colSizeClosed] = size(Closed);
+        for rowClosedIndex=1:rowSizeClosed
+            if (Closed(rowClosedIndex,1)==successors(successorRow,1)) && (Closed(rowClosedIndex,2)==successors(successorRow,2))&& (Closed(rowClosedIndex,5)<successors(successorRow,5))
+                sameWithLessF = true;
+                break;
+            end
+        end
+        if sameWithLessF == true
+           continue; 
+        end
+        
+        % if we have survived to this line of code then add node to open
+        Open(openCounter,1) = successors(successorRow,1);
+        Open(openCounter,2) = successors(successorRow,2);
+        Open(openCounter,3) = successors(successorRow,3);
+        Open(openCounter,4) = successors(successorRow,4);
+        Open(openCounter,5) = successors(successorRow,5);
+        Open(openCounter,6) = successors(successorRow,6);
+        openCounter = openCounter + 1;
+    end
+    if arrived == true
+        break;
+    end
+    Closed(closedCounter,1)=temp(1);
+    Closed(closedCounter,2)=temp(2);
+    Closed(closedCounter,3)=;
+    Closed(closedCounter,4)=;
+    Closed(closedCounter,5)=;
     [rowSizeOpen, colSizeOpen] = size(Open);
 end

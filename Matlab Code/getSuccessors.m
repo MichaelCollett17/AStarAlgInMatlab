@@ -1,6 +1,6 @@
 function successors = getSuccessors(x, y, g, GoalLocation)
 %could have written this as a loop but my Matlab skills are weak
-newg = g+1
+newg = g+1;
 successors(1,1) = x-1;
 successors(1,2) = y-1;
 successors(1,3) = x;

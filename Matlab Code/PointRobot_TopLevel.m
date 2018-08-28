@@ -31,23 +31,18 @@ RobotLocation = [2,2]';
 %Draw the robot location on the map
 PlotRobotLocation(RobotLocation);
 
-AStar(OccupancyMap, GoalLocation, RobotLocation);
-
+pathBackwards = AStar(OccupancyMap, GoalLocation, RobotLocation);
 %loop until we reach the goal location or some maximum number of moves have
 %been tried or we are not moving and have no hope of movement
-while(~isequal(RobotLocation, GoalLocation) && (pathLength < 2000))
-    break;
-    %[newRobotLocation, obstacleHitInMove] = moveRobot(x_move, y_move, CurrentRobotLocation, OccupancyMap)
+%while(~isequal(RobotLocation, GoalLocation) && (pathLength < 2000))
+[rows,cols] = size(pathBackwards);
+for i=rows:-1:1
+%[newRobotLocation, obstacleHitInMove] = moveRobot(x_move, y_move, CurrentRobotLocation, OccupancyMap)
     %x_move and y_move are either -1, 0, +1
-    %[RobotLocation, obstacleEncountered, pathLength] = moveRobot(1, 1, RobotLocation, OccupancyMap);
-    if(obstacleEncountered)
+    [RobotLocation, obstacleEncountered, pathLength] = moveRobot(pathBackwards(i,2)-RobotLocation(1), pathBackwards(i,1)-RobotLocation(2), RobotLocation, OccupancyMap);
         %[RobotLocation, obstacleEncountered, pathLength] = moveRobot(0, -1, RobotLocation, OccupancyMap);
         %If we are not moving again then we are dead for this
         %implimentation
-        if(obstacleEncountered)
-            break;
-        end
-    end
 
     %pause for dramatic effect
     pause(.05);

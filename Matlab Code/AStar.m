@@ -1,26 +1,26 @@
-function [] = AStar(OccupancyMap, GoalLocation, RobotLocation)
+function [pathBackwards] = AStar(OccupancyMap, GoalLocation, RobotLocation)
 Open = [];
 Closed = [];
 [rows, cols] = size(OccupancyMap);
-
+pathBackwards = [];
 % closed array gets all the 1's
 % closed array format is x y parentx parenty
 % NOTE: Formatting array instead of building object or researching Matlab
 % farther, but should update in with proper programming in future
 closedCounter = 1;
 openCounter = 1;
-for i=1:rows
-    for j=1:cols
-        if(OccupancyMap(i,j) == 1)
-            Closed(closedCounter,1)=i;
-            Closed(closedCounter,2)=j;
-            Closed(closedCounter,3)=-1;
-            Closed(closedCounter,4)=-1;
-            Closed(closedCounter,5)=-1;
-            closedCounter=closedCounter+1;
-        end
-    end
-end
+% for i=1:rows
+%     for j=1:cols
+%         if(OccupancyMap(i,j) == 1)
+%             Closed(closedCounter,1)=i;
+%             Closed(closedCounter,2)=j;
+%             Closed(closedCounter,3)=-1;
+%             Closed(closedCounter,4)=-1;
+%             Closed(closedCounter,5)=-1;
+%             closedCounter=closedCounter+1;
+%         end
+%     end
+% end
 
 heuristic = h(RobotLocation(1), RobotLocation(2), GoalLocation(1), GoalLocation(2));
 % open array format is [x,y,parentx,parenty,f,g]
@@ -35,9 +35,9 @@ openCounter = openCounter + 1;
 while(rowSizeOpen > 0)
     f = 10000;
     temp = [];
-    removeIdx = -1;
+    removeIndex = -1;
     arrived = false;
-    disp(rowSizeOpen);
+    [rowSizeOpen, colSizeOpen] = size(Open);
     for ridx=1:rowSizeOpen
         if Open(ridx,5) < f
             f = Open(ridx,5);
@@ -50,9 +50,34 @@ while(rowSizeOpen > 0)
     % successors format is 1:[x,y,parentx,parenty,f,g]...
     successors = getSuccessors(temp(1), temp(2), temp(6), GoalLocation);
     for successorRow=1:8
+        if(OccupancyMap(successors(successorRow,1),successors(successorRow,2)) == 1)
+            continue;
+        end
         if (successors(successorRow,1) == GoalLocation(1))&&(successors(successorRow,2)==GoalLocation(2))
             % must traverse through parents and build return array
-            arrived = true
+            pathCount = 1;
+            pathBackwards(pathCount, 1) = GoalLocation(1);
+            pathBackwards(pathCount, 2) = GoalLocation(2);
+            pathCount = pathCount+1;
+            pathBackwards(pathCount, 1) = temp(1);
+            pathBackwards(pathCount, 2) = temp(2);
+            pathCount = pathCount+1;
+            currX = temp(3);
+            currY = temp(4);
+            [rowSizeClosed, colSizeClosed] = size(Closed);
+            while(~(currX==RobotLocation(1) && currY==RobotLocation(2)))
+                pathBackwards(pathCount, 1) = currX;
+                pathBackwards(pathCount, 2) = currY;
+                pathCount = pathCount+1;
+                for fi=1:rowSizeClosed
+                    if (currX==Closed(fi,1))&&(currY==Closed(fi,2))
+                        currX=Closed(fi,3);
+                        currY=Closed(fi,4);
+                    end
+                end
+            end
+            arrived = true;
+            disp(pathBackwards);
             disp("meow");
             break;
         end
@@ -62,7 +87,7 @@ while(rowSizeOpen > 0)
         [rowSizeOpen, colSizeOpen] = size(Open);
         sameWithLessF = false;
         for rowindex=1:rowSizeOpen
-            if (Open(rowindex,1)==successors(successorRow,1)) && (Open(rowindex,2)==successors(successorRow,2))&& (Open(rowindex,5)<successors(successorRow,5))
+            if (Open(rowindex,1)==successors(successorRow,1)) && (Open(rowindex,2)==successors(successorRow,2))&& (Open(rowindex,5)<=successors(successorRow,5))
                 sameWithLessF = true;
                 break;
             end
@@ -74,7 +99,7 @@ while(rowSizeOpen > 0)
         % if same with less f in closed, skip (skips walls and obstacles :)
         [rowSizeClosed, colSizeClosed] = size(Closed);
         for rowClosedIndex=1:rowSizeClosed
-            if (Closed(rowClosedIndex,1)==successors(successorRow,1)) && (Closed(rowClosedIndex,2)==successors(successorRow,2))&& (Closed(rowClosedIndex,5)<successors(successorRow,5))
+            if (Closed(rowClosedIndex,1)==successors(successorRow,1)) && (Closed(rowClosedIndex,2)==successors(successorRow,2))&& (Closed(rowClosedIndex,5)<=successors(successorRow,5))
                 sameWithLessF = true;
                 break;
             end
